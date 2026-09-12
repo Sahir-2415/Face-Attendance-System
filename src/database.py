@@ -62,13 +62,25 @@ def mark_attendance(student_id):
         print("Attendance already marked for today")
     conn.close()
 
+def get_attendance():
+    conn=sqlite3.connect("attendance.db")
+    cursor=conn.cursor()
+    cursor.execute("""
+SELECT attendance.student_id,students.name,attendance.date,attendance.time
+FROM attendance 
+JOIN students 
+ON attendance.student_id=students.student_id""")
+    attendance=cursor.fetchall()
+    conn.close()
+    return attendance
+
 import numpy as np
 # test_embedding=np.random.rand(512).astype("float32")
 # add_student("5001","Sahir",test_embedding)
 # print("Student added")
 
 students=get_students()
-print(students)
+
 for student in students:
     student_id,name,embedding_blob=student
     embedding=np.frombuffer(embedding_blob,dtype="float32")
@@ -80,3 +92,4 @@ for student in students:
 
 create_attendance_table()
 # mark_attendance("5001")
+
