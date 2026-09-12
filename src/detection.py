@@ -1,6 +1,6 @@
 from insightface.app import FaceAnalysis
 import mediapipe as mp
-from database import add_student,get_students
+from database import add_student,get_students,mark_attendance
 import cv2
 import numpy as np
 app=FaceAnalysis(
@@ -72,6 +72,7 @@ while True:
                     best_student=(student_id,name)
             if best_student and best_similarity>0.6:
                 print("Recognized Student:",best_student[1],best_similarity)
+                mark_attendance(best_student[0])
             else:
                 print("Unknown Student",best_similarity)
             key=cv2.waitKey(1) & 0xFF

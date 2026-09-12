@@ -1,6 +1,6 @@
 import sqlite3
 conn=sqlite3.connect("attendance.db")
-
+from datetime import datetime
 cursor=conn.cursor()
 
 cursor.execute("""
@@ -45,6 +45,23 @@ CREATE TABLE IF NOT EXISTS attendance(
     conn.commit()
     conn.close()
 
+def mark_attendance(student_id):
+    conn=sqlite3.connect("attendance.db")
+    cursor=conn.cursor()
+    now=datetime.now()
+    date=now.strftime("%Y-%m-%d")
+    time=now.strftime("%H:%M:%S")
+    try:
+        cursor.execute(
+            "INSERT INTO attendance(student_id,date,time) VALUES (?,?,?)",
+            (student_id,date,time)
+        )
+        conn.commit()
+        print("Attendance marked")
+    except sqlite3.IntegrityError:
+        print("Attendance already marked for today")
+    conn.close()
+
 import numpy as np
 # test_embedding=np.random.rand(512).astype("float32")
 # add_student("5001","Sahir",test_embedding)
@@ -62,3 +79,4 @@ for student in students:
 # COMMENTED LINES ARE JUST FOR TESTING PURPOSES AND CAN BE UNCOMMENTED TO TEST THE DATABASE FUNCTIONALITY.
 
 create_attendance_table()
+# mark_attendance("5001")
