@@ -1,5 +1,6 @@
 import mediapipe as mp
 import cv2
+from camera import get_camera,get_frame
 BaseOptions=mp.tasks.BaseOptions
 FaceDetector=mp.tasks.vision.FaceDetector
 FaceDetectorOptions=mp.tasks.vision.FaceDetectorOptions
@@ -12,14 +13,12 @@ options=FaceDetectorOptions(
 )
 detector=FaceDetector.create_from_options(options)
 
-cap=cv2.VideoCapture(0)
-
-ret,frame=cap.read()
+cap=get_camera()
 while True:
     if not cap.isOpened():
         break
-    ret,frame=cap.read()
-    if not ret:
+    frame=get_frame(cap)
+    if frame is None:
         break
     rgb=cv2.cvtColor(frame,cv2.COLOR_BGR2RGB) 
     image=mp.Image(image_format=mp.ImageFormat.SRGB,data=rgb)
@@ -35,8 +34,15 @@ while True:
             y=bbox.origin_y
             width=bbox.width
             height=bbox.height
-            print(x,y,width,height)
             face=frame[y:y+height,x:x+width]
+            cv2.rectangle(
+                frame,
+                (x,y),
+                (x+width,y+height),
+                (0,255,0),
+                2
+            )
+            # this is to show the rectangle around the detected face , the upper code
             cv2.imshow("Face",face)
     cv2.imshow("Camera",frame)
     if cv2.waitKey(1)==ord('q'):
