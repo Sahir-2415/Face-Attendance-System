@@ -77,7 +77,9 @@ while True:
                 print("Unknown Student",best_similarity)
             key=cv2.waitKey(1) & 0xFF
             if key==ord('r'):
-                    add_student("5001","Sahir",embedding)
+                    student_id=input("Enter student id:")
+                    name=input("Enter student name:")
+                    add_student(student_id,name,embedding)
                     print("Face registered")
             # print(embedding.shape)
             
