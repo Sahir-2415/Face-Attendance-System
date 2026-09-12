@@ -1,5 +1,6 @@
 from insightface.app import FaceAnalysis
 import mediapipe as mp
+from database import add_student,get_students
 import cv2
 import numpy as np
 app=FaceAnalysis(
@@ -57,17 +58,37 @@ while True:
             face = frame[y:y+height, x:x+width]
             embedding=app.models["recognition"].get_feat(face)
             embedding=embedding[0]
-            print(embedding.shape)
-            if "saved_embedding" not in locals():
-                saved_embedding=embedding
-            similarity=np.dot(saved_embedding,embedding)/(
-                np.linalg.norm(saved_embedding)*np.linalg.norm(embedding)
-            )
-            print(similarity)
-            if similarity>0.6:
-                print("Face Matched")
+            students=get_students()
+            best_similarity=-1
+            best_student=None
+            for student in students:
+                student_id,name,embedding_blob=student
+                saved_embedding=np.frombuffer(embedding_blob,dtype="float32")
+                similarity=np.dot(saved_embedding,embedding)/(
+                    np.linalg.norm(saved_embedding)*np.linalg.norm(embedding)
+                )
+                if similarity>best_similarity:
+                    best_similarity=similarity
+                    best_student=(student_id,name)
+            if best_student and best_similarity>0.6:
+                print("Recognized Student:",best_student[1],best_similarity)
             else:
-                print("Face Not Matched")
+                print("Unknown Student",best_similarity)
+            key=cv2.waitKey(1) & 0xFF
+            if key==ord('r'):
+                    add_student("5001","Sahir",embedding)
+                    print("Face registered")
+            # print(embedding.shape)
+            
+            # similarity=np.dot(saved_embedding,embedding)/(
+            #     np.linalg.norm(saved_embedding)*np.linalg.norm(embedding)
+            # )
+            # print(similarity)
+            # if similarity>0.6:
+            #     print("Face Matched")
+            # else:
+            #     print("Face Not Matched")
+
             # this code is for face recognition and getting the embedding of the detected face
             # if faces:
             #     embedding=faces[0].embedding
@@ -87,9 +108,9 @@ while True:
             # this is to show the rectangle around the detected face , the upper code
             cv2.imshow("Face",face)
     cv2.imshow("Camera",frame)
+    
     if cv2.waitKey(1)==ord('q'):
         break
-
 
 cap.release()
 cv2.destroyAllWindows()
