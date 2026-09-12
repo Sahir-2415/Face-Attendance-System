@@ -54,10 +54,20 @@ while True:
             y=bbox.origin_y
             width=bbox.width
             height=bbox.height
-            face=frame[y:y+height,x:x+width]
-            # face_for_recognition=cv2.resize(face,(224,224))
+            face = frame[y:y+height, x:x+width]
             embedding=app.models["recognition"].get_feat(face)
+            embedding=embedding[0]
             print(embedding.shape)
+            if "saved_embedding" not in locals():
+                saved_embedding=embedding
+            similarity=np.dot(saved_embedding,embedding)/(
+                np.linalg.norm(saved_embedding)*np.linalg.norm(embedding)
+            )
+            print(similarity)
+            if similarity>0.6:
+                print("Face Matched")
+            else:
+                print("Face Not Matched")
             # this code is for face recognition and getting the embedding of the detected face
             # if faces:
             #     embedding=faces[0].embedding
